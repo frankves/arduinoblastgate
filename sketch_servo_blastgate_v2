@@ -1,0 +1,147 @@
+/*  Servo Control for blast gates
+    with a little help from Bob from ILikeToMakeStuff :)
+    Frank van Es - 5 apr 2021
+
+    PINConfig:
+                  ServoPin    ButtonPin
+    Servo   1     3           2
+    Servo   2     5           4
+    Servo   3     6           7
+    Servo   4     9           8
+    Servo   5     10          12
+*/
+
+#include <Servo.h>
+
+// SERVO CONFIG
+// twelve servo objects can be created on most boards
+const byte servoCount = 5;
+
+static Servo servoList[servoCount];
+
+//const int LED_BUILTIN = 3;
+
+const int OPEN_ALL = 135;
+const int CLOSE_ALL = 90;
+const int openPos = 135;  // open positions for servo
+const int closedPos = 90;  // close position for servo
+
+//BUTTON CONFIG
+const int button1 = 2; // pins for buttons
+const int button2 = 4;
+const int button3 = 7;
+const int button4 = 8;
+const int button5 = 12;
+
+int closePorts[4];
+int openPorts[1];
+
+void setup() {
+
+  Serial.begin(9600);
+
+  //DEFINE BUTTONS
+  pinMode (button1, INPUT_PULLUP); // pullup for not needing an extra resistor
+  pinMode (button2, INPUT_PULLUP);
+  pinMode (button3, INPUT_PULLUP);
+  pinMode (button4, INPUT_PULLUP);
+  pinMode (button5, INPUT_PULLUP);
+
+  //DEFINE SERVO ARRAY
+  servoList[0].attach(3);   //~
+  servoList[1].attach(5);   //~
+  servoList[2].attach(6);   //~
+  servoList[3].attach(9);   //~
+  servoList[4].attach(10);  //~
+}
+
+void loop() {
+
+  // read the state of the switch/button:
+  int buttonState1 = digitalRead(button1);
+  int buttonState2 = digitalRead(button2);
+  int buttonState3 = digitalRead(button3);
+  int buttonState4 = digitalRead(button4);
+  int buttonState5 = digitalRead(button5);
+
+  delay(50); // generally an ok delay for pressing a button.
+
+
+Serial.println(buttonState1);
+if (buttonState1 == LOW){
+  digitalWrite(LED_BUILTIN, HIGH);
+}
+
+  //button press
+  if (buttonState1 == LOW) {
+    Serial.println("Button1 is Pressed");
+    setServoState(0);
+  }
+
+  if (buttonState2 == LOW) {
+    Serial.println("Button2 is Pressed");
+    setServoState(1);
+  }
+
+  if (buttonState3 == LOW) {
+    Serial.println("Button3 is Pressed");
+    setServoState(2);
+  }
+
+  if (buttonState4 == LOW) {
+   Serial.println("Button4 is Pressed");
+    setServoState(3);
+  }
+
+  if (buttonState5 == LOW) {
+    //Serial.println("Button5 is Pressed");
+    setServoState(4);
+  }
+}
+
+// Open servo corresponding to button and close all other gates,
+void setServoState(char number) {
+  int thisServ = 0;
+  int val;
+  boolean ignoreAll = false;
+  switch (number) {
+    case '1':
+      val = 0;
+      break;
+    case '2':
+      val = 1;
+      break;
+    case '3':
+      val = 2;
+      break;
+    case '4':
+      val = 3;
+      break;
+    case '5':
+      val = 4;
+      break;
+
+      ignoreAll = true;
+      break;
+    default:
+      val = number;
+      break;
+  }
+  if (!ignoreAll) {
+    servoList[val].write(openPos); // prevent vacuum pull 
+    delay(500);
+    for (thisServ = 0; thisServ < servoCount; thisServ += 1) {
+      int newPos = 0;
+      if (thisServ == val or val == OPEN_ALL) {
+        newPos = openPos;
+      }
+      else {
+        newPos = closedPos;
+      }
+
+      servoList[thisServ].write(newPos);
+      
+      delay(500); // wait between to prevent overload of circuits
+    }
+  }
+}
