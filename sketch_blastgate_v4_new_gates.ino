@@ -147,7 +147,8 @@ void setServoState(char number) {
   if (!ignoreAll) {
     
     //Serial.println("In the servo loop");
-    servoList[1].write(openPos); // first open a gate to prevent vacuum Pull
+    servoList[val].write(openPos); // first open a gate to prevent vacuum Pull
+    //openAll();
     for (thisServ = 0; thisServ < servoCount; thisServ += 1) {
       delay(500); // wait between to prevent overload of circuits
       if (thisServ == val) {
@@ -182,4 +183,13 @@ void servoDetach() {
   servoList[2].detach();
   servoList[3].detach();
   servoList[4].detach();
+}
+
+void openAll(){
+  servoList[0].write(openPos);
+  servoList[1].write(openPos);
+  servoList[2].write(openPos);
+  servoList[3].write(openPos);
+  servoList[4].write(openPos);
+  
 }
